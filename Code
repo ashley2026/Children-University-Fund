@@ -1,0 +1,30 @@
+function doGet() {
+  const sheet = SpreadsheetApp.getActiveSheet();
+  const rows = sheet.getDataRange().getValues();
+
+  const supporters = [];
+  let total = 0;
+
+  for (let i = 1; i < rows.length; i++) {
+    const [name, amount] = rows[i];
+    total += Number(amount);
+    supporters.push({ name, amount });
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ total, supporters }))
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeader("Access-Control-Allow-Origin", "*");
+}
+
+function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSheet();
+  const data = JSON.parse(e.postData.contents);
+
+  sheet.appendRow([data.name, data.amount, new Date()]);
+
+  return ContentService
+    .createTextOutput("Success")
+    .setMimeType(ContentService.MimeType.TEXT)
+    .setHeader("Access-Control-Allow-Origin", "*");
+}
