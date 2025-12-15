@@ -1,112 +1,83 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fundraising Tracker</title>
+  <title>Children University Fundraising</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f7f7f7; }
-    .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    h1 { text-align: center; }
-    .progress-wrapper { margin: 20px 0; }
-    .progress-bar-bg { width: 100%; background: #e0e0e0; border-radius: 20px; overflow: hidden; }
-    .progress-bar { height: 24px; width: 0%; background: #4CAF50; transition: width 0.5s; }
+    body { font-family: Arial; padding: 20px; }
     #supporters { margin-top: 20px; }
-    li { padding: 6px 0; border-bottom: 1px solid #eee; }
-    input { padding: 6px; margin: 4px 0; width: calc(50% - 8px); }
-    button { padding: 6px 12px; margin-top: 6px; cursor: pointer; }
+    #loading { font-style: italic; color: #555; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Fundraising Progress</h1>
+  <h1>Children University Fundraising</h1>
+  <p>Total Raised: $<span id="total">0</span></p>
 
-    <h3>Goal: $<span id="goal">5000</span></h3>
-    <h3>Current: $<span id="current">0</span></h3>
+  <h3>Add Supporter</h3>
+  <input type="text" id="name" placeholder="Name">
+  <input type="number" id="amount" placeholder="Amount">
+  <button onclick="addSupporter()">Add</button>
 
-    <div class="progress-wrapper">
-      <div class="progress-bar-bg">
-        <div class="progress-bar" id="progressBar"></div>
-      </div>
-    </div>
-
-    <h2>Supporters</h2>
-    <ul id="supporters"></ul>
-
-    <h3>Add Supporter</h3>
-    <input type="text" id="nameInput" placeholder="Name" />
-    <input type="number" id="amountInput" placeholder="Amount" />
-    <button onclick="addSupporter()">Add</button>
+  <div id="supporters">
+    <h3>Supporters</h3>
+    <p id="loading">Loading supporters...</p>
+    <ul id="list" style="display:none;"></ul>
   </div>
 
   <script>
+    // Replace with your Apps Script URL
     const API_URL = 'https://script.google.com/macros/s/AKfycby_hDEGg1qI-WiOkpqjy8ixZVDvyOuNynDW7GLZVPC3rcgoj9zucX-rMY0WzfPEcrsD/exec';
-    const goal = 5000;
-
-    let supporters = [];
-    let current = 0;
 
     async function fetchData() {
+      const loadingEl = document.getElementById('loading');
+      const listEl = document.getElementById('list');
+
+      loadingEl.style.display = 'block';  // show loading
+      listEl.style.display = 'none';      // hide list while loading
+
       try {
         const res = await fetch(API_URL);
         const data = await res.json();
 
-        supporters = Array.isArray(data.supporters) ? data.supporters : [];
-        current = Number(data.total) || 0;
+        document.getElementById('total').innerText = data.total;
 
-        updateUI();
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        supporters = [];
-        current = 0;
-        updateUI();
-      }
-    }
-
-    function updateUI() {
-      document.getElementById('current').textContent = current;
-      const pct = Math.min((current / goal) * 100, 100);
-      document.getElementById('progressBar').style.width = pct + '%';
-
-      const list = document.getElementById('supporters');
-      list.innerHTML = '';
-      if (supporters.length === 0) {
-        const li = document.createElement('li');
-        li.textContent = 'No supporters yet.';
-        list.appendChild(li);
-      } else {
-        supporters.forEach(s => {
+        listEl.innerHTML = '';
+        data.supporters.forEach(s => {
           const li = document.createElement('li');
-          li.textContent = `${s.name} — $${s.amount}`;
-          list.appendChild(li);
+          li.textContent = `${s.name}: $${s.amount}`;
+          listEl.appendChild(li);
         });
+      } catch (error) {
+        loadingEl.textContent = 'Failed to load supporters.';
+        console.error(error);
       }
+
+      loadingEl.style.display = 'none';   // hide loading
+      listEl.style.display = 'block';     // show list
     }
 
     async function addSupporter() {
-      const name = document.getElementById('nameInput').value.trim();
-      const amount = Number(document.getElementById('amountInput').value);
-
-      if (!name || !amount) return alert('Please enter name and amount.');
+      const name = document.getElementById('name').value;
+      const amount = Number(document.getElementById('amount').value);
+      if(!name || !amount) return alert('Enter name and amount');
 
       try {
         await fetch(API_URL, {
           method: 'POST',
-          body: JSON.stringify({ name, amount }),
+          body: JSON.stringify({ name, amount })
         });
-
-        supporters.push({ name, amount });
-        current += amount;
-        updateUI();
-
-        document.getElementById('nameInput').value = '';
-        document.getElementById('amountInput').value = '';
-      } catch (err) {
-        console.error('Error submitting supporter:', err);
+      } catch (error) {
+        alert('Failed to add supporter.');
+        console.error(error);
+        return;
       }
+
+      document.getElementById('name').value = '';
+      document.getElementById('amount').value = '';
+      fetchData();
     }
 
-    window.addEventListener('DOMContentLoaded', fetchData);
+    // Load data when page fully loads
+    window.onload = fetchData;
   </script>
 </body>
 </html>
