@@ -15,8 +15,8 @@
     }
     #bar {
       width: 0%;
-      background: #4caf50;
       height: 100%;
+      background: #4caf50;
       border-radius: 5px;
       transition: width 0.5s ease;
     }
@@ -26,16 +26,21 @@
 <body>
   <h1>Children University Fundraising</h1>
 
-  <p>Total Raised: $<span id="total">0</span></p>
+  <!-- Total raised and goal -->
+  <p>Total Raised: $<span id="total">0</span> / $<span id="goal">5000</span></p>
+
+  <!-- Progress bar -->
   <div id="bar-container">
     <div id="bar"></div>
   </div>
 
+  <!-- Add supporter form -->
   <h3>Add Supporter</h3>
   <input type="text" id="name" placeholder="Name">
   <input type="number" id="amount" placeholder="Amount">
   <button onclick="addSupporter()">Add</button>
 
+  <!-- Supporters list -->
   <div id="supporters">
     <h3>Supporters</h3>
     <p id="loading" style="display:none;">Loading supporters...</p>
@@ -43,14 +48,13 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycby_hDEGg1qI-WiOkpqjy8ixZVDvyOuNynDW7GLZVPC3rcgoj9zucX-rMY0WzfPEcrsD/exec'; // 你的 Apps Script URL
-    const GOAL = 5000; // 你的目標金額
+    const API_URL = 'https://script.google.com/macros/s/AKfycby_hDEGg1qI-WiOkpqjy8ixZVDvyOuNynDW7GLZVPC3rcgoj9zucX-rMY0WzfPEcrsD/exec';
+    const GOAL = 5000; // 目標金額
 
     async function fetchData() {
       const loadingEl = document.getElementById('loading');
       const listEl = document.getElementById('list');
 
-      // 顯示 loading
       loadingEl.style.display = 'block';
       listEl.style.display = 'none';
 
@@ -60,6 +64,7 @@
 
         // 更新 total
         document.getElementById('total').innerText = data.total;
+        document.getElementById('goal').innerText = GOAL;
 
         // 更新進度條
         const percentage = Math.min((data.total / GOAL) * 100, 100);
@@ -78,7 +83,6 @@
         console.error(error);
       }
 
-      // 隱藏 loading，顯示列表
       loadingEl.style.display = 'none';
       listEl.style.display = 'block';
     }
@@ -99,14 +103,12 @@
         return;
       }
 
-      // 清空輸入
       document.getElementById('name').value = '';
       document.getElementById('amount').value = '';
 
       fetchData();
     }
 
-    // 頁面載入時抓資料
     window.onload = fetchData;
   </script>
 </body>
