@@ -13,7 +13,7 @@
     .progress-bar { height: 24px; width: 0%; background: #4CAF50; transition: width 0.5s; }
     #supporters { margin-top: 20px; }
     li { padding: 6px 0; border-bottom: 1px solid #eee; }
-    input { padding: 6px; margin: 4px 0; width: calc(50% - 8px); }
+    input { padding: 6px; margin: 4px 0; width: calc(33% - 8px); }
     button { padding: 6px 12px; margin-top: 6px; cursor: pointer; }
     #loading { font-style: italic; color: #555; }
   </style>
@@ -38,7 +38,7 @@
     <h3>Add Supporter</h3>
     <input type="text" id="nameInput" placeholder="Name" />
     <input type="number" id="amountInput" placeholder="Amount" />
-    <input type="date" id="dateInput"  placeholder="Date" />
+    <input type="date" id="dateInput" />
     <button onclick="addSupporter()">Add</button>
   </div>
 
@@ -51,8 +51,9 @@
 
     async function fetchData() {
       const loadingEl = document.getElementById('loading');
-      loadingEl.style.display = 'block';  // 顯示 loading
       const supportersList = document.getElementById('supporters');
+
+      loadingEl.style.display = 'block';
       supportersList.style.display = 'none';
 
       try {
@@ -70,7 +71,7 @@
         updateUI();
       }
 
-      loadingEl.style.display = 'none';  // 隱藏 loading
+      loadingEl.style.display = 'none';
       supportersList.style.display = 'block';
     }
 
@@ -88,7 +89,8 @@
       } else {
         supporters.forEach(s => {
           const li = document.createElement('li');
-          li.textContent = `${s.name} — $${s.amount}`;
+          const dateText = s.date ? ` — ${s.date}` : '';
+          li.textContent = `${s.name} — $${s.amount}${dateText}`;
           list.appendChild(li);
         });
       }
@@ -97,22 +99,23 @@
     async function addSupporter() {
       const name = document.getElementById('nameInput').value.trim();
       const amount = Number(document.getElementById('amountInput').value);
-      const date = document.getElementById('dateInput').value;
+      const date = document.getElementById('dateInput').value; // 取得日期
 
       if (!name || !amount) return alert('Please enter name and amount.');
 
       try {
         await fetch(API_URL, {
           method: 'POST',
-          body: JSON.stringify({ name, amount }),
+          body: JSON.stringify({ name, amount, date }), // 傳日期
         });
 
-        supporters.push({ name, amount });
+        supporters.push({ name, amount, date });
         current += amount;
         updateUI();
 
         document.getElementById('nameInput').value = '';
         document.getElementById('amountInput').value = '';
+        document.getElementById('dateInput').value = '';
       } catch (err) {
         console.error('Error submitting supporter:', err);
       }
