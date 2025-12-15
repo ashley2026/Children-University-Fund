@@ -26,16 +26,19 @@
 <body>
   <h1>Children University Fundraising</h1>
 
+  <!-- Total and progress bar -->
   <p>Total Raised: $<span id="total">0</span></p>
   <div id="bar-container">
     <div id="bar"></div>
   </div>
 
+  <!-- Add supporter form -->
   <h3>Add Supporter</h3>
   <input type="text" id="name" placeholder="Name">
   <input type="number" id="amount" placeholder="Amount">
   <button onclick="addSupporter()">Add</button>
 
+  <!-- Supporters list with loading indicator -->
   <div id="supporters">
     <h3>Supporters</h3>
     <p id="loading">Loading supporters...</p>
@@ -43,13 +46,14 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycby_hDEGg1qI-WiOkpqjy8ixZVDvyOuNynDW7GLZVPC3rcgoj9zucX-rMY0WzfPEcrsD/exec';
-    const GOAL = 1000; // Set your fundraising goal here
+    const API_URL = 'https://script.google.com/macros/s/AKfycby_hDEGg1qI-WiOkpqjy8ixZVDvyOuNynDW7GLZVPC3rcgoj9zucX-rMY0WzfPEcrsD/exec'; // Replace with your Apps Script URL
+    const GOAL = 1000; // Set your fundraising goal
 
     async function fetchData() {
       const loadingEl = document.getElementById('loading');
       const listEl = document.getElementById('list');
 
+      // Show loading text
       loadingEl.style.display = 'block';
       listEl.style.display = 'none';
 
@@ -64,7 +68,7 @@
         const percentage = Math.min((data.total / GOAL) * 100, 100);
         document.getElementById('bar').style.width = percentage + '%';
 
-        // Update supporters list
+        // Populate supporters list
         listEl.innerHTML = '';
         data.supporters.forEach(s => {
           const li = document.createElement('li');
@@ -77,6 +81,7 @@
         console.error(error);
       }
 
+      // Hide loading, show list
       loadingEl.style.display = 'none';
       listEl.style.display = 'block';
     }
@@ -97,12 +102,15 @@
         return;
       }
 
+      // Clear inputs
       document.getElementById('name').value = '';
       document.getElementById('amount').value = '';
+
+      // Refresh data
       fetchData();
     }
 
-    // Fetch data after page loads
+    // Fetch data when page loads
     window.onload = fetchData;
   </script>
 </body>
