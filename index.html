@@ -1,115 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Children University Fundraising</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fundraising Tracker</title>
   <style>
-    body { font-family: Arial; padding: 20px; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f7f7f7; }
+    .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    h1 { text-align: center; }
+    .progress-wrapper { margin: 20px 0; }
+    .progress-bar-bg { width: 100%; background: #e0e0e0; border-radius: 20px; overflow: hidden; }
+    .progress-bar { height: 24px; width: 0%; background: #4CAF50; transition: width 0.5s; }
     #supporters { margin-top: 20px; }
-    #loading { font-style: italic; color: #555; }
-    #bar-container {
-      width: 100%;
-      background: #eee;
-      height: 30px;
-      border-radius: 5px;
-      margin-top: 10px;
-    }
-    #bar {
-      width: 0%;
-      height: 100%;
-      background: #4caf50;
-      border-radius: 5px;
-      transition: width 0.5s ease;
-    }
-    input { margin-right: 5px; }
+    li { padding: 6px 0; border-bottom: 1px solid #eee; }
+    input { padding: 6px; margin: 4px 0; width: calc(50% - 8px); }
+    button { padding: 6px 12px; margin-top: 6px; cursor: pointer; }
   </style>
 </head>
 <body>
-  <h1>Children University Fundraising</h1>
+  <div class="container">
+    <h1>Fundraising Progress</h1>
 
-  <!-- Total raised and goal -->
-  <p>Total Raised: $<span id="total">0</span> / $<span id="goal">5000</span></p>
+    <h3>Goal: $<span id="goal">5000</span></h3>
+    <h3>Current: $<span id="current">0</span></h3>
 
-  <!-- Progress bar -->
-  <div id="bar-container">
-    <div id="bar"></div>
-  </div>
+    <div class="progress-wrapper">
+      <div class="progress-bar-bg">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
 
-  <!-- Add supporter form -->
-  <h3>Add Supporter</h3>
-  <input type="text" id="name" placeholder="Name">
-  <input type="number" id="amount" placeholder="Amount">
-  <button onclick="addSupporter()">Add</button>
+    <h2>Supporters</h2>
+    <ul id="supporters"></ul>
 
-  <!-- Supporters list -->
-  <div id="supporters">
-    <h3>Supporters</h3>
-    <p id="loading" style="display:none;">Loading supporters...</p>
-    <ul id="list"></ul>
+    <h3>Add Supporter</h3>
+    <input type="text" id="nameInput" placeholder="Name" />
+    <input type="number" id="amountInput" placeholder="Amount" />
+    <button onclick="addSupporter()">Add</button>
   </div>
 
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycby_hDEGg1qI-WiOkpqjy8ixZVDvyOuNynDW7GLZVPC3rcgoj9zucX-rMY0WzfPEcrsD/exec';
-    const GOAL = 5000; // 目標金額
+    const goal = 5000;
+
+    let supporters = [];
+    let current = 0;
 
     async function fetchData() {
-      const loadingEl = document.getElementById('loading');
-      const listEl = document.getElementById('list');
-
-      loadingEl.style.display = 'block';
-      listEl.style.display = 'none';
-
       try {
         const res = await fetch(API_URL);
         const data = await res.json();
 
-        // 更新 total
-        document.getElementById('total').innerText = data.total;
-        document.getElementById('goal').innerText = GOAL;
+        supporters = Array.isArray(data.supporters) ? data.supporters : [];
+        current = Number(data.total) || 0;
 
-        // 更新進度條
-        const percentage = Math.min((data.total / GOAL) * 100, 100);
-        document.getElementById('bar').style.width = percentage + '%';
-
-        // 更新 supporters list
-        listEl.innerHTML = '';
-        data.supporters.forEach(s => {
-          const li = document.createElement('li');
-          li.textContent = `${s.name}: $${s.amount}`;
-          listEl.appendChild(li);
-        });
-
-      } catch (error) {
-        loadingEl.textContent = 'Failed to load supporters.';
-        console.error(error);
+        updateUI();
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        supporters = [];
+        current = 0;
+        updateUI();
       }
+    }
 
-      loadingEl.style.display = 'none';
-      listEl.style.display = 'block';
+    function updateUI() {
+      document.getElementById('current').textContent = current;
+      const pct = Math.min((current / goal) * 100, 100);
+      document.getElementById('progressBar').style.width = pct + '%';
+
+      const list = document.getElementById('supporters');
+      list.innerHTML = '';
+      if (supporters.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = 'No supporters yet.';
+        list.appendChild(li);
+      } else {
+        supporters.forEach(s => {
+          const li = document.createElement('li');
+          li.textContent = `${s.name} — $${s.amount}`;
+          list.appendChild(li);
+        });
+      }
     }
 
     async function addSupporter() {
-      const name = document.getElementById('name').value;
-      const amount = Number(document.getElementById('amount').value);
-      if(!name || !amount) return alert('Enter name and amount');
+      const name = document.getElementById('nameInput').value.trim();
+      const amount = Number(document.getElementById('amountInput').value);
+
+      if (!name || !amount) return alert('Please enter name and amount.');
 
       try {
         await fetch(API_URL, {
           method: 'POST',
-          body: JSON.stringify({ name, amount })
+          body: JSON.stringify({ name, amount }),
         });
-      } catch (error) {
-        alert('Failed to add supporter.');
-        console.error(error);
-        return;
+
+        supporters.push({ name, amount });
+        current += amount;
+        updateUI();
+
+        document.getElementById('nameInput').value = '';
+        document.getElementById('amountInput').value = '';
+      } catch (err) {
+        console.error('Error submitting supporter:', err);
       }
-
-      document.getElementById('name').value = '';
-      document.getElementById('amount').value = '';
-
-      fetchData();
     }
 
-    window.onload = fetchData;
+    window.addEventListener('DOMContentLoaded', fetchData);
   </script>
 </body>
 </html>
