@@ -26,7 +26,7 @@
 <body>
   <h1>Children University Fundraising</h1>
 
-  <!-- Total and progress bar -->
+  <!-- Total raised and progress bar -->
   <p>Total Raised: $<span id="total">0</span></p>
   <div id="bar-container">
     <div id="bar"></div>
@@ -46,8 +46,8 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycby_hDEGg1qI-WiOkpqjy8ixZVDvyOuNynDW7GLZVPC3rcgoj9zucX-rMY0WzfPEcrsD/exec'; // Replace with your Apps Script URL
-    const GOAL = 1000; // Set your fundraising goal
+    const API_URL = 'https://script.google.com/macros/s/AKfycby_hDEGg1qI-WiOkpqjy8ixZVDvyOuNynDW7GLZVPC3rcgoj9zucX-rMY0WzfPEcrsD/exec // Your Apps Script URL
+    const GOAL = 5000; // Set your fundraising goal here
 
     async function fetchData() {
       const loadingEl = document.getElementById('loading');
@@ -64,11 +64,11 @@
         // Update total
         document.getElementById('total').innerText = data.total;
 
-        // Update progress bar
+        // Update progress bar based on goal
         const percentage = Math.min((data.total / GOAL) * 100, 100);
         document.getElementById('bar').style.width = percentage + '%';
 
-        // Populate supporters list
+        // Update supporters list
         listEl.innerHTML = '';
         data.supporters.forEach(s => {
           const li = document.createElement('li');
@@ -110,7 +110,7 @@
       fetchData();
     }
 
-    // Fetch data when page loads
+    // Load data when page loads
     window.onload = fetchData;
   </script>
 </body>
