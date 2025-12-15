@@ -38,6 +38,7 @@
     <h3>Add Supporter</h3>
     <input type="text" id="nameInput" placeholder="Name" />
     <input type="number" id="amountInput" placeholder="Amount" />
+    <input type="date" id="dateInput" />
     <button onclick="addSupporter()">Add</button>
   </div>
 
@@ -96,6 +97,7 @@
     async function addSupporter() {
       const name = document.getElementById('nameInput').value.trim();
       const amount = Number(document.getElementById('amountInput').value);
+      const date = document.getElementById('dateInput').value;
 
       if (!name || !amount) return alert('Please enter name and amount.');
 
