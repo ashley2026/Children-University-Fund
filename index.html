@@ -49,6 +49,13 @@
     let supporters = [];
     let current = 0;
 
+    // 每次頁面載入時，把日期欄位預設為今天
+    function setDateToToday() {
+      const dateInput = document.getElementById('dateInput');
+      const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
+      dateInput.value = today;
+    }
+
     async function fetchData() {
       const loadingEl = document.getElementById('loading');
       const supportersList = document.getElementById('supporters');
@@ -99,14 +106,19 @@
     async function addSupporter() {
       const name = document.getElementById('nameInput').value.trim();
       const amount = Number(document.getElementById('amountInput').value);
-      const date = document.getElementById('dateInput').value; // 取得日期
+      let date = document.getElementById('dateInput').value;
 
       if (!name || !amount) return alert('Please enter name and amount.');
+
+      // 如果沒選日期，自動填今天
+      if (!date) {
+        date = new Date().toISOString().split('T')[0];
+      }
 
       try {
         await fetch(API_URL, {
           method: 'POST',
-          body: JSON.stringify({ name, amount, date }), // 傳日期
+          body: JSON.stringify({ name, amount, date }),
         });
 
         supporters.push({ name, amount, date });
@@ -115,13 +127,16 @@
 
         document.getElementById('nameInput').value = '';
         document.getElementById('amountInput').value = '';
-        document.getElementById('dateInput').value = '';
+        setDateToToday(); // 清空後日期欄位恢復今天
       } catch (err) {
         console.error('Error submitting supporter:', err);
       }
     }
 
-    window.addEventListener('DOMContentLoaded', fetchData);
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchData();
+      setDateToToday(); // 初始日期欄位
+    });
   </script>
 </body>
 </html>
