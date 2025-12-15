@@ -6,11 +6,30 @@
     body { font-family: Arial; padding: 20px; }
     #supporters { margin-top: 20px; }
     #loading { font-style: italic; color: #555; }
+    #bar-container {
+      width: 100%; 
+      background: #eee; 
+      height: 30px; 
+      border-radius: 5px; 
+      margin-top: 10px;
+    }
+    #bar {
+      width: 0%; 
+      background: #4caf50; 
+      height: 100%; 
+      border-radius: 5px;
+      transition: width 0.5s ease;
+    }
+    input { margin-right: 5px; }
   </style>
 </head>
 <body>
   <h1>Children University Fundraising</h1>
+
   <p>Total Raised: $<span id="total">0</span></p>
+  <div id="bar-container">
+    <div id="bar"></div>
+  </div>
 
   <h3>Add Supporter</h3>
   <input type="text" id="name" placeholder="Name">
@@ -24,35 +43,42 @@
   </div>
 
   <script>
-    // Replace with your Apps Script URL
     const API_URL = 'https://script.google.com/macros/s/AKfycby_hDEGg1qI-WiOkpqjy8ixZVDvyOuNynDW7GLZVPC3rcgoj9zucX-rMY0WzfPEcrsD/exec';
+    const GOAL = 1000; // Set your fundraising goal here
 
     async function fetchData() {
       const loadingEl = document.getElementById('loading');
       const listEl = document.getElementById('list');
 
-      loadingEl.style.display = 'block';  // show loading
-      listEl.style.display = 'none';      // hide list while loading
+      loadingEl.style.display = 'block';
+      listEl.style.display = 'none';
 
       try {
         const res = await fetch(API_URL);
         const data = await res.json();
 
+        // Update total
         document.getElementById('total').innerText = data.total;
 
+        // Update progress bar
+        const percentage = Math.min((data.total / GOAL) * 100, 100);
+        document.getElementById('bar').style.width = percentage + '%';
+
+        // Update supporters list
         listEl.innerHTML = '';
         data.supporters.forEach(s => {
           const li = document.createElement('li');
           li.textContent = `${s.name}: $${s.amount}`;
           listEl.appendChild(li);
         });
+
       } catch (error) {
         loadingEl.textContent = 'Failed to load supporters.';
         console.error(error);
       }
 
-      loadingEl.style.display = 'none';   // hide loading
-      listEl.style.display = 'block';     // show list
+      loadingEl.style.display = 'none';
+      listEl.style.display = 'block';
     }
 
     async function addSupporter() {
@@ -76,7 +102,7 @@
       fetchData();
     }
 
-    // Load data when page fully loads
+    // Fetch data after page loads
     window.onload = fetchData;
   </script>
 </body>
