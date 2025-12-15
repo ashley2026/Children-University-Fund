@@ -7,16 +7,16 @@
     #supporters { margin-top: 20px; }
     #loading { font-style: italic; color: #555; }
     #bar-container {
-      width: 100%; 
-      background: #eee; 
-      height: 30px; 
-      border-radius: 5px; 
+      width: 100%;
+      background: #eee;
+      height: 30px;
+      border-radius: 5px;
       margin-top: 10px;
     }
     #bar {
-      width: 0%; 
-      background: #4caf50; 
-      height: 100%; 
+      width: 0%;
+      background: #4caf50;
+      height: 100%;
       border-radius: 5px;
       transition: width 0.5s ease;
     }
@@ -26,34 +26,31 @@
 <body>
   <h1>Children University Fundraising</h1>
 
-  <!-- Total raised and progress bar -->
   <p>Total Raised: $<span id="total">0</span></p>
   <div id="bar-container">
     <div id="bar"></div>
   </div>
 
-  <!-- Add supporter form -->
   <h3>Add Supporter</h3>
   <input type="text" id="name" placeholder="Name">
   <input type="number" id="amount" placeholder="Amount">
   <button onclick="addSupporter()">Add</button>
 
-  <!-- Supporters list with loading indicator -->
   <div id="supporters">
     <h3>Supporters</h3>
-    <p id="loading">Loading supporters...</p>
-    <ul id="list" style="display:none;"></ul>
+    <p id="loading" style="display:none;">Loading supporters...</p>
+    <ul id="list"></ul>
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycby_hDEGg1qI-WiOkpqjy8ixZVDvyOuNynDW7GLZVPC3rcgoj9zucX-rMY0WzfPEcrsD/exec'; // Your Apps Script URL
-    const GOAL = 5000; // Set your fundraising goal here
+    const API_URL = 'https://script.google.com/macros/s/AKfycby_hDEGg1qI-WiOkpqjy8ixZVDvyOuNynDW7GLZVPC3rcgoj9zucX-rMY0WzfPEcrsD/exec'; // 你的 Apps Script URL
+    const GOAL = 5000; // 你的目標金額
 
     async function fetchData() {
       const loadingEl = document.getElementById('loading');
       const listEl = document.getElementById('list');
 
-      // Show loading text
+      // 顯示 loading
       loadingEl.style.display = 'block';
       listEl.style.display = 'none';
 
@@ -61,14 +58,14 @@
         const res = await fetch(API_URL);
         const data = await res.json();
 
-        // Update total
+        // 更新 total
         document.getElementById('total').innerText = data.total;
 
-        // Update progress bar based on goal
+        // 更新進度條
         const percentage = Math.min((data.total / GOAL) * 100, 100);
         document.getElementById('bar').style.width = percentage + '%';
 
-        // Update supporters list
+        // 更新 supporters list
         listEl.innerHTML = '';
         data.supporters.forEach(s => {
           const li = document.createElement('li');
@@ -81,7 +78,7 @@
         console.error(error);
       }
 
-      // Hide loading, show list
+      // 隱藏 loading，顯示列表
       loadingEl.style.display = 'none';
       listEl.style.display = 'block';
     }
@@ -102,15 +99,14 @@
         return;
       }
 
-      // Clear inputs
+      // 清空輸入
       document.getElementById('name').value = '';
       document.getElementById('amount').value = '';
 
-      // Refresh data
       fetchData();
     }
 
-    // Load data when page loads
+    // 頁面載入時抓資料
     window.onload = fetchData;
   </script>
 </body>
